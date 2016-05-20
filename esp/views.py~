@@ -1,0 +1,38 @@
+from django.shortcuts import get_object_or_404, render, redirect
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.views import generic
+from django.apps import apps
+from .models import PWM, Device
+
+
+class IndexView(generic.ListView):
+    model = PWM
+    template_name = 'esp/index.html'
+    def get_queryset(self):
+	return PWM.objects.all()
+
+class PWMControl(generic.edit.UpdateView):
+    model = PWM
+    fields =['setting', 'on']
+    template_name = 'esp/control.html'
+
+def submit(request, pwm_id):
+    pwm = get_object_or_404(PWM, pk=pwm_id)
+    pwm.setting = request.POST['setting']
+    pwm.save() #get rid of this
+    client = apps.get_app_config('esp').client
+    print("publishing msg")
+    client.publish("test",payload="test payload", qos=2)
+    return redirect('esp:control',pk=pwm_id)
+
+class DeviceList(generic.ListView):
+    model = Device
+    template_name = 'esp/devices.html'
+    def get_queryset(self):
+        return Device.objects.all()
+
+class DeviceConfig(generic.edit.UpdateView):
+    model = Device
+    fields =['name', 'espID']
+    template_name = 'esp/config.html'

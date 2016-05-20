@@ -1,0 +1,10 @@
+<a href="{% url 'esp:index' %} ">Back to Device List</a>
+<h1>{{ pwm.name }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form id="controlForm"  action="submit/" method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<button type="submit">Send Command</button>
+</form>

@@ -1,0 +1,25 @@
+
+<h1>{{ pwm.name }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form id="controlForm"  method="post">
+	{% csrf_token %}
+	<input id="settingRange" type="range" min="0" max="255" value="{{ pwm.setting }}" step="1" onchange="showValue(this.value)" />
+	<span id="settingDisplay">0</span>
+
+	<button type="submit">Send Command</button>
+</form>
+<script type="text/javascript">
+function showValue(newValue)
+{
+	document.getElementById("settingDisplay").innerHTML=newValue;
+	//document.getElementById("controlForm").submit();
+}
+function handleClick(cb) 
+{
+	display("Clicked, new value = " + cb.checked);
+	document.getElementById("controlForm").submit();
+}
+</script>
+
