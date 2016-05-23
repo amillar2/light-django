@@ -23,15 +23,17 @@ def on_publish(client, userdata, mid):
 
 def on_status(client, userdata, msg):
 	#grab espID from <espID>/status topic string
-	espID = msg.topic.split('/')[0] 
-	statusData = json.loads(msg.payload)
-	d = Device.objects.filter(espID=espID)
-	#if device exists, update status
-	if d:
-		d = d[0]
-		d.update_status(statusData)
-	else:
-		print("Received status from unknown device")
+	espID = msg.topic.split('/')[0]
+	print(msg.payload) 
+	if msg.payload:
+		statusData = json.loads(msg.payload)
+		d = Device.objects.filter(espID=espID)
+		#if device exists, update status
+		if d:
+			d = d[0]
+			d.update_status(statusData)
+		else:
+			print("Received status from unknown device")
 	
 
 def on_discovery(client, userdata, msg):
@@ -44,7 +46,7 @@ def on_discovery(client, userdata, msg):
 		d[0].config_device()
 	#if espID does not exist, make new object and save
 	else:
-		Device.objects.create(espID=espID)
+		Device.objects.create(espID=espID, name=espID)
 
 def on_switch(client, userdata, msg):
 	print("received switch input")
