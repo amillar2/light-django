@@ -23,7 +23,7 @@ class DeviceAdmin(admin.ModelAdmin):
     	inlines = [PWMInline,SwitchInline]
 	def save_model(self, request, obj, form, change):
 	    if not obj.pk: # call super method if object has no primary key 
-		super(DeviceAdmin, self).save_model(request, obj, form, change)
+		super(Device, self).save_model(request, obj, form, change)
 	    else:
 		pass # don't actually save the parent instance
 
@@ -31,7 +31,7 @@ class DeviceAdmin(admin.ModelAdmin):
 	    form.save_m2m()
 	    for formset in formsets:
 		self.save_formset(request, form, formset, change=change)
-	    super(DeviceAdmin, self).save_model(request, form.instance, form, change)
+	    super(Device, self).save_model(request, form.instance, form, change)
 
 class SwitchAdmin(admin.ModelAdmin):
 	model = Switch
