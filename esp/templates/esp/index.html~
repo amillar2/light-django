@@ -25,7 +25,8 @@
 					if (json.on) {
 						$("#on_button").addClass("light_on");
 						$("#on_button").text("Turn Off");
-					} else {
+					}
+					else {
 						$("#on_button").removeClass("light_on");
 						$("#on_button").text("Turn On");
 					}

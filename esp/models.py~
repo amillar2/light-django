@@ -8,8 +8,8 @@ import json
 
 @python_2_unicode_compatible
 class Device(models.Model):
-    espID = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
+    espID = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
     online = models.BooleanField(default=False)
     def status(self):
 	return 'Online' if self.online else 'Offline'
@@ -30,11 +30,13 @@ class Device(models.Model):
         for sw in self.switch_set.all():
                 config['mqtt_topic_sw%d'%i] = sw.topic
 		i+=1
-	client = apps.get_app_config('esp').client
-    	client.publish(topic=self.espID,payload=json.dumps(config), qos=2, retain=True)
+	if config:
+		client = apps.get_app_config('esp').client
+    		client.publish(topic=self.espID+'/config',payload=json.dumps(config), qos=2, retain=False)
 
     def update_status(self, statusData):
 	#set online status
+	print(statusData)
 	if 'online' in statusData.keys():
 		self.online = statusData['online']
 	#loop through device pwms, update status, and save
@@ -54,9 +56,9 @@ class Device(models.Model):
 @python_2_unicode_compatible
 class PWM(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    room = models.CharField(max_length=200)
-    topic = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
+    room = models.CharField(max_length=20)
+    topic = models.CharField(max_length=50)
+    name = models.CharField(max_length=20)
     pretty_name = models.CharField(max_length=200, default='')
     setting = models.IntegerField(default=0)
     on = models.BooleanField(default=False)
@@ -87,9 +89,9 @@ class PWM(models.Model):
 class Switch(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     pwm = models.ManyToManyField(PWM)
-    room = models.CharField(max_length=200)
-    topic = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
+    room = models.CharField(max_length=20)
+    topic = models.CharField(max_length=50)
+    name = models.CharField(max_length=20)
     pretty_name = models.CharField(max_length=200, default='')
     on = models.BooleanField(default=False)
     channel = models.IntegerField(default=0)

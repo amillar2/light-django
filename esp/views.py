@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.apps import apps
 from .models import PWM, Device
-
+import json
 
 class IndexView(generic.ListView):
     model = PWM
@@ -17,11 +17,61 @@ class PWMControl(generic.edit.UpdateView):
     fields =['setting', 'on']
     template_name = 'esp/control.html'
 
-def submit(request, pwm_id):
-    pwm = get_object_or_404(PWM, pk=pwm_id)
-    if 'on' in request.POST.keys():
-	on = True
+
+def submit(request):
+    if request.method == 'POST':
+        pwm_id = request.POST.get('pwm_id')
+	pwm = PWM.objects.filter(pk=pwm_id)
+	if pwm:
+		pwm = pwm[0]
+		if 'on' in request.POST.keys():
+			on = request.POST.get('on')
+		else:
+			on = True
+		if 'setting' in request.POST.keys():
+			setting = request.POST.get('setting')
+		else:
+			setting = pwm.setting
+		pwm.set(on,setting)
+		response_data = {'result':'success'}
+	else:
+		response_data = {'result':'no such pwm'}
+	
+
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
+
     else:
-	on = False
-    pwm.set(request.POST['setting'], on)
-    return redirect('esp:control',pk=pwm_id)
+        return HttpResponse(json.dumps({"nothing to see": "this isn't happening"}), content_type="application/json")
+
+def toggle(request):
+    if request.method == 'POST':
+        pwm_id = request.POST.get('pwm_id')
+	pwm = PWM.objects.filter(pk=pwm_id)
+	if pwm:
+		pwm[0].toggle()
+		response_data = {'result':'success'}
+	else:
+		response_data = {'result':'no such pwm'}
+	
+
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+    else:
+        return HttpResponse(json.dumps({"nothing to see": "this isn't happening"}), content_type="application/json")
+
+def update(request):
+    if request.method == 'GET':
+        pwm_id = request.GET.get('pwm_id')	
+        response_data = {}
+	pwm = PWM.objects.filter(pk=pwm_id)
+	if pwm:
+		pwm = pwm[0]
+		response_data = {'setting':pwm.setting, 'on':pwm.status() }
+	else:
+		response_data = {'result':'no such pwm'}
+
+        return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+    else:
+        return HttpResponse(json.dumps({"nothing to see": "this isn't happening"}), content_type="application/json")
+

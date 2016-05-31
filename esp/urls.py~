@@ -8,6 +8,5 @@ urlpatterns = [
         url(r'^$', views.IndexView.as_view(), name='index'),
 	url(r'^submit/$', views.submit),
 	url(r'^toggle/$', views.toggle),
-	url(r'^update/$', views.update),
 	]
 
