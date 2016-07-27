@@ -19,6 +19,10 @@ class Device(models.Model):
 	print('saving device')
         super(Device, self).save(*args, **kwargs)
 	self.config_device()
+    def soft_save(self, *args, **kwargs):
+        print('saving device')
+        super(Device, self).save(*args, **kwargs)
+
     def config_device(self):
 	config = {}
 	i=1
@@ -36,9 +40,10 @@ class Device(models.Model):
 
     def update_status(self, statusData):
 	#set online status
-	print(statusData)
+	print("updating esp status:")
 	if 'online' in statusData.keys():
 		self.online = statusData['online']
+		self.soft_save()
 	#loop through device pwms, update status, and save
 	for pwm in self.pwm_set.all():
 		if pwm.topic in statusData.keys():

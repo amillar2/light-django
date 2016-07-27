@@ -25,14 +25,17 @@ def submit(request):
 	if pwm:
 		pwm = pwm[0]
 		if 'on' in request.POST.keys():
-			on = request.POST.get('on')
+			if(request.POST.get('on')=='true'):
+				on = True
+			elif(request.POST.get('on')=='false'):
+				on = False
 		else:
-			on = True
+			on = pwm.on
 		if 'setting' in request.POST.keys():
-			setting = request.POST.get('setting')
+			setting = int(request.POST.get('setting'))
 		else:
 			setting = pwm.setting
-		pwm.set(on,setting)
+		pwm.set(setting*255/100,on)
 		response_data = {'result':'success'}
 	else:
 		response_data = {'result':'no such pwm'}
