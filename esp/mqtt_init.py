@@ -34,7 +34,6 @@ def on_status(client, userdata, msg):
 			d.update_status(statusData)
 		else:
 			print("Received status from unknown device")
-	alexa_discovery(client)
 
 def on_discovery(client, userdata, msg):
 	print('received discovery messgage')
@@ -70,28 +69,3 @@ def mqtt_init():
 	client.loop_start()
 	return client
 
-def alexa_discovery(client):
-	discApp = []
-	baseApp = dict(actions = [
-                	"turnOn",
-	                "turnOff",
-			"setPercentage",
-			"incrementPercentage",
-			"decrementPercentage"
-		],
-		manufacturerName = "Andy Millard",
-                modelName = "ESP Dimmer",
-                version = "1.0"
-	)
-	for pwm in PWM.objects.all():
-		newApp = baseApp.copy()
-		newApp["applianceId"] = pwm.topic
-		newApp["friendlyDescription"] = pwm.pretty_name
-		newApp["friendlyName"] = pwm.pretty_name
-		newApp["isReachable"] = pwm.device.online
-		discApp.append(newApp)
-	
-	#post to alexa discovery topic
-	topic = "alexa/discovery"
-	payload = json.dumps(discApp)
-	client.publish(topic,payload = payload, qos = 2, retain = True)

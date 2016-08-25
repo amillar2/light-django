@@ -30,7 +30,7 @@ def submit(request):
 			elif(request.POST.get('on')=='false'):
 				on = False
 		else:
-			on = pwm.on
+			on = True
 		if 'setting' in request.POST.keys():
 			setting = int(request.POST.get('setting'))
 		else:

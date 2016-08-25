@@ -18,6 +18,8 @@ class Device(models.Model):
     def save(self, *args, **kwargs):
 	print('saving device')
         super(Device, self).save(*args, **kwargs)
+	client = apps.get_app_config('esp').client
+	alexa_discovery(client)
 	self.config_device()
     def soft_save(self, *args, **kwargs):
         print('saving device')
@@ -112,4 +114,33 @@ class Switch(models.Model):
 
     def __str__(self):
         return self.name
+
+def alexa_discovery(client):
+    discApp = []
+    baseApp = dict(actions = [
+            "turnOn",
+            "turnOff",
+            "setPercentage",
+            "incrementPercentage",
+            "decrementPercentage"
+            ],
+        manufacturerName = "Andy Millard",
+        modelName = "ESP Dimmer",
+        version = "1.0",
+    )
+    for inst in PWM.objects.all():
+        newApp = baseApp.copy()
+        newApp["applianceId"] = inst.pk
+        newApp["friendlyDescription"] = inst.pretty_name
+        newApp["friendlyName"] = inst.pretty_name
+        newApp["isReachable"] = True #could include online status here
+        newApp["additionalApplianceDetails"]={"topic":inst.topic}
+	print newApp["additionalApplianceDetails"]["topic"]
+	print inst.topic
+        discApp.append(newApp)
+    #post to alexa discovery topic
+    topic = "alexa/discovery"
+    payload = json.dumps(discApp)
+    client.publish(topic,payload = payload, qos = 2, retain = True)
+
 
