@@ -30,7 +30,7 @@ def submit(request):
 			elif(request.POST.get('on')=='false'):
 				on = False
 		else:
-			on = True
+			on = pwm.on
 		if 'setting' in request.POST.keys():
 			setting = int(request.POST.get('setting'))
 		else:
@@ -68,8 +68,9 @@ def update(request):
         response_data = {}
 	pwm = PWM.objects.filter(pk=pwm_id)
 	if pwm:
-		pwm = pwm[0]
-		response_data = {'setting':pwm.setting, 'on':pwm.status() }
+		light = pwm[0]
+		response_data = {'setting':light.setting*100/255, 'on':light.on }
+		print light.on
 	else:
 		response_data = {'result':'no such pwm'}
 

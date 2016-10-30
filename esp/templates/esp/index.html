@@ -21,7 +21,7 @@
 			        // handle a successful response
 			        success : function(json) {
 					//alert(json.setting);
-					$(".dial").val(json.setting).trigger("change");
+					$(".dial").val(json.setting).trigger('change');
 					if (json.on) {
 						$("#on_button").addClass("light_on");
 						$("#on_button").text("Turn Off");
