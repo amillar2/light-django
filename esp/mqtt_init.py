@@ -33,7 +33,7 @@ def on_status(client, userdata, msg):
 			d = d[0]
 			d.update_status(statusData)
 		else:
-			print("Received status from unknown device")
+			print("Received status from unknown device: %s"%espID)
 
 def on_discovery(client, userdata, msg):
 	print('received discovery messgage')

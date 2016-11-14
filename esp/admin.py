@@ -37,6 +37,7 @@ class SwitchAdmin(admin.ModelAdmin):
 	model = Switch
 	filter_horizontal = ('pwm',)
         fields = ['pwm']
+	list_display = ('pretty_name','room')
 
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Switch, SwitchAdmin)

@@ -15,6 +15,11 @@ class Device(models.Model):
 	return 'Online' if self.online else 'Offline'
     def get_absolute_url(self):
         return reverse('esp:config', args=(self.pk,))
+    def delete(self, *args, **kwargs):
+	print('deleting device')
+	super(Device, self).delete(*args, **kwargs)
+        client = apps.get_app_config('esp').client
+        alexa_discovery(client)
     def save(self, *args, **kwargs):
 	print('saving device')
         super(Device, self).save(*args, **kwargs)
@@ -65,7 +70,7 @@ class PWM(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     room = models.CharField(max_length=20)
     topic = models.CharField(max_length=50)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, default='light')
     pretty_name = models.CharField(max_length=200, default='')
     setting = models.IntegerField(default=0)
     on = models.BooleanField(default=False)
@@ -95,7 +100,7 @@ class PWM(models.Model):
 @python_2_unicode_compatible
 class Switch(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    pwm = models.ManyToManyField(PWM)
+    pwm = models.ManyToManyField(PWM, blank=True)
     room = models.CharField(max_length=20)
     topic = models.CharField(max_length=50)
     name = models.CharField(max_length=20)
@@ -135,12 +140,13 @@ def alexa_discovery(client):
         newApp["friendlyName"] = inst.pretty_name
         newApp["isReachable"] = True #could include online status here
         newApp["additionalApplianceDetails"]={"topic":inst.topic}
-	print newApp["additionalApplianceDetails"]["topic"]
-	print inst.topic
+	#print newApp["additionalApplianceDetails"]["topic"]
+	#print inst.topic
         discApp.append(newApp)
     #post to alexa discovery topic
-    topic = "alexa/discovery"
+    topic = "shadow/update"
+    discApp = {"state":{"reported":{"discoveredAppliances":discApp}}}
     payload = json.dumps(discApp)
-    client.publish(topic,payload = payload, qos = 2, retain = True)
+    client.publish(topic,payload = payload, qos = 1)
 
 
