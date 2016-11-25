@@ -36,7 +36,6 @@ class Device(models.Model):
 	print('sending config message')
 	for pwm in self.pwm_set.all():
 		config['mqtt_topic_pwm%d'%i] = pwm.topic
-		config['mqtt_mode_pwm%d'%i] = int(pwm.nodim)
 		i+=1
 	i=1
         for sw in self.switch_set.all():
@@ -76,8 +75,7 @@ class PWM(models.Model):
     setting = models.IntegerField(default=0)
     on = models.BooleanField(default=False)
     channel = models.IntegerField(default=0)
-    nodim = models.BooleanField(default=False, verbose_name='Not Dimmable')
-    fpwidth = models.IntegerField(default=30, verbose_name='Fire Pulse Width')
+    nodim = models.BooleanField(default=False)
     def status(self):
 	return 'On' if self.on else 'Off'
     def set(self, setting, on):
@@ -125,15 +123,13 @@ class Switch(models.Model):
 
 def alexa_discovery(client):
     discApp = []
-    dim_action = [
-            "setPercentage",
-            "incrementPercentage",
-            "decrementPercentage"
-	    ]
-
+    dim_actions = [django.db.utils.OperationalError: no such column
     baseApp = dict(actions = [
             "turnOn",
             "turnOff",
+            "setPercentage",
+            "incrementPercentage",
+            "decrementPercentage"
             ],
         manufacturerName = "Andy Millard",
         modelName = "ESP Dimmer",
@@ -146,8 +142,6 @@ def alexa_discovery(client):
         newApp["friendlyName"] = inst.pretty_name
         newApp["isReachable"] = True #could include online status here
         newApp["additionalApplianceDetails"]={"topic":inst.topic}
-	if not inst.nodim:
-	    newApp["actions"] = newApp["actions"] + dim_action
 	#print newApp["additionalApplianceDetails"]["topic"]
 	#print inst.topic
         discApp.append(newApp)

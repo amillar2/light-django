@@ -69,7 +69,7 @@ def update(request):
 	pwm = PWM.objects.filter(pk=pwm_id)
 	if pwm:
 		light = pwm[0]
-		response_data = {'setting':light.setting*100/255, 'on':light.on }
+		response_data = {'setting':light.setting*100/255, 'on':light.on, 'nodim':light.nodim }
 		print light.on
 	else:
 		response_data = {'result':'no such pwm'}

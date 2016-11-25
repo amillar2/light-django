@@ -6,7 +6,7 @@ class PWMInline(admin.StackedInline):
 	model = PWM
 	extra = 2
 	max_num = 2
-	fields = ['name','pretty_name', 'room', 'topic']
+	fields = ['name','pretty_name', 'room', 'topic','nodim','fpwidth']
 	readonly_fields = ('topic',)
 
 class SwitchInline(admin.StackedInline):

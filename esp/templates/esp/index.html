@@ -20,8 +20,16 @@
 
 			        // handle a successful response
 			        success : function(json) {
-					//alert(json.setting);
-					$(".dial").val(json.setting).trigger('change');
+					//alert(json.nodim);
+					if (json.nodim && json.on) {
+						$(".dial").val(100).trigger('change');
+					}
+					else if (json.nodim && !json.on) {
+						$(".dial").val(0).trigger('change');
+					}
+					else {
+						$(".dial").val(json.setting).trigger('change');
+					}
 					if (json.on) {
 						$("#on_button").addClass("light_on");
 						$("#on_button").text("Turn Off");
