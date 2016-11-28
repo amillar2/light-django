@@ -37,6 +37,7 @@ class Device(models.Model):
 	for pwm in self.pwm_set.all():
 		config['mqtt_topic_pwm%d'%i] = pwm.topic
 		config['mqtt_mode_pwm%d'%i] = int(pwm.nodim)
+		config['mqtt_fpwidth_pwm%d'%i] = pwm.fpwidth
 		i+=1
 	i=1
         for sw in self.switch_set.all():
