@@ -38,7 +38,12 @@ class SwitchAdmin(admin.ModelAdmin):
 	filter_horizontal = ('pwm',)
         fields = ['pwm']
 	list_display = ('pretty_name','room')
-
+	
+class VirtualPWMAdmin(admin.ModelAdmin):
+	model = VirtualPWM
+	filter_horizontal = ('pwm',)
+        fields = ['pwm', 'nodim'] #not sure if this is the right way to add no dim
+	list_display = ('pretty_name','room')
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Switch, SwitchAdmin)
 
