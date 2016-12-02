@@ -120,9 +120,17 @@ class Switch(models.Model):
 	if self.pretty_name == '':
 		self.pretty_name = self.name 
         super(Switch, self).save(*args, **kwargs)
-
     def __str__(self):
         return self.name
+
+@python_2_unicode_compatible
+class VirtualPWM(models.Model):
+    name = models.CharField(max_length=20, default='light')
+    pretty_name = models.CharField(max_length=200, default='')
+    setting = models.IntegerField(default=0)
+    on = models.BooleanField(default=False)
+    nodim = models.BooleanField(default=False, verbose_name='Not Dimmable')
+    pwm = models.ManyToManyField(PWM, blank=True)
 
 def alexa_discovery(client):
     discApp = []
@@ -151,6 +159,22 @@ def alexa_discovery(client):
 	    newApp["actions"] = newApp["actions"] + dim_action
 	#print newApp["additionalApplianceDetails"]["topic"]
 	#print inst.topic
+        discApp.append(newApp)
+    #modify baseApp for virutal dimmer
+    baseApp['modelName'] = 'Virtual Dimmer'
+	
+    for inst in VirtualPWM.objects.all():
+        newApp = baseApp.copy()
+        newApp["applianceId"] = inst.pk
+        newApp["friendlyDescription"] = inst.pretty_name
+        newApp["friendlyName"] = inst.pretty_name
+        newApp["isReachable"] = True #virtual devices always online
+	topic = []
+	for member in inst.pwm.all():
+		topics.append(member.topic)
+        newApp["additionalApplianceDetails"]={"topic":topics}
+	if not inst.nodim:
+	    newApp["actions"] = newApp["actions"] + dim_action
         discApp.append(newApp)
     #post to alexa discovery topic
     topic = "shadow/update"
