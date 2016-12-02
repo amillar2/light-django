@@ -154,7 +154,7 @@ def alexa_discovery(client):
         newApp["friendlyDescription"] = inst.pretty_name
         newApp["friendlyName"] = inst.pretty_name
         newApp["isReachable"] = True #could include online status here
-        newApp["additionalApplianceDetails"]={"topic":inst.topic}
+        newApp["additionalApplianceDetails"]={"topic":[inst.topic]}
 	if not inst.nodim:
 	    newApp["actions"] = newApp["actions"] + dim_action
 	#print newApp["additionalApplianceDetails"]["topic"]
