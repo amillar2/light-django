@@ -6,7 +6,7 @@ class PWMInline(admin.StackedInline):
 	model = PWM
 	extra = 2
 	max_num = 2
-	fields = ['name','pretty_name', 'room', 'topic','nodim','fpwidth']
+	fields = ['name','pretty_name', 'room', 'topic','nodim','fpwidth','min','max']
 	readonly_fields = ('topic',)
 
 class SwitchInline(admin.StackedInline):
@@ -18,7 +18,7 @@ class SwitchInline(admin.StackedInline):
 
 class DeviceAdmin(admin.ModelAdmin):
 	list_display = ('name', 'espID', 'status')
-	fields = ['espID','name', 'online']
+	fields = ['espID','name', 'online', 'fade_delay']
 	readonly_fields = ('online',)
     	inlines = [PWMInline,SwitchInline]
 	def save_model(self, request, obj, form, change):
@@ -38,12 +38,7 @@ class SwitchAdmin(admin.ModelAdmin):
 	filter_horizontal = ('pwm',)
         fields = ['pwm']
 	list_display = ('pretty_name','room')
-	
-class VirtualPWMAdmin(admin.ModelAdmin):
-	model = VirtualPWM
-	filter_horizontal = ('pwm',)
-        fields = ['pwm', 'nodim'] #not sure if this is the right way to add no dim
-	list_display = ('pretty_name','room')
+
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Switch, SwitchAdmin)
 

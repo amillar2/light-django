@@ -11,6 +11,7 @@ class Device(models.Model):
     espID = models.CharField(max_length=20)
     name = models.CharField(max_length=50)
     online = models.BooleanField(default=False)
+    fade_delay = models.IntegerField(default=80, verbose_name='Fade Delay')
     def status(self):
 	return 'Online' if self.online else 'Offline'
     def get_absolute_url(self):
@@ -32,12 +33,15 @@ class Device(models.Model):
 
     def config_device(self):
 	config = {}
+	config['mqtt_delay'] = self.fade_delay
 	i=1
 	print('sending config message')
 	for pwm in self.pwm_set.all():
 		config['mqtt_topic_pwm%d'%i] = pwm.topic
 		config['mqtt_mode_pwm%d'%i] = int(pwm.nodim)
 		config['mqtt_fpwidth_pwm%d'%i] = pwm.fpwidth
+		config['mqtt_min_pwm%d'%i] = pwm.min
+		config['mqtt_max_pwm%d'%i] = pwm.max
 		i+=1
 	i=1
         for sw in self.switch_set.all():
@@ -79,6 +83,8 @@ class PWM(models.Model):
     channel = models.IntegerField(default=0)
     nodim = models.BooleanField(default=False, verbose_name='Not Dimmable')
     fpwidth = models.IntegerField(default=30, verbose_name='Fire Pulse Width')
+    min = models.IntegerField(default=0, verbose_name='Min On Level')
+    max = models.IntegerField(default=255, verbose_name='Max Control Level')
     def status(self):
 	return 'On' if self.on else 'Off'
     def set(self, setting, on):
@@ -120,17 +126,9 @@ class Switch(models.Model):
 	if self.pretty_name == '':
 		self.pretty_name = self.name 
         super(Switch, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.name
-
-@python_2_unicode_compatible
-class VirtualPWM(models.Model):
-    name = models.CharField(max_length=20, default='light')
-    pretty_name = models.CharField(max_length=200, default='')
-    setting = models.IntegerField(default=0)
-    on = models.BooleanField(default=False)
-    nodim = models.BooleanField(default=False, verbose_name='Not Dimmable')
-    pwm = models.ManyToManyField(PWM, blank=True)
 
 def alexa_discovery(client):
     discApp = []
@@ -154,27 +152,11 @@ def alexa_discovery(client):
         newApp["friendlyDescription"] = inst.pretty_name
         newApp["friendlyName"] = inst.pretty_name
         newApp["isReachable"] = True #could include online status here
-        newApp["additionalApplianceDetails"]={"topic":[inst.topic]}
+        newApp["additionalApplianceDetails"]={"topic":inst.topic}
 	if not inst.nodim:
 	    newApp["actions"] = newApp["actions"] + dim_action
 	#print newApp["additionalApplianceDetails"]["topic"]
 	#print inst.topic
-        discApp.append(newApp)
-    #modify baseApp for virutal dimmer
-    baseApp['modelName'] = 'Virtual Dimmer'
-	
-    for inst in VirtualPWM.objects.all():
-        newApp = baseApp.copy()
-        newApp["applianceId"] = inst.pk
-        newApp["friendlyDescription"] = inst.pretty_name
-        newApp["friendlyName"] = inst.pretty_name
-        newApp["isReachable"] = True #virtual devices always online
-	topic = []
-	for member in inst.pwm.all():
-		topics.append(member.topic)
-        newApp["additionalApplianceDetails"]={"topic":topics}
-	if not inst.nodim:
-	    newApp["actions"] = newApp["actions"] + dim_action
         discApp.append(newApp)
     #post to alexa discovery topic
     topic = "shadow/update"
